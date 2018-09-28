@@ -70,7 +70,7 @@ fffiGrid <- function(pr, pet, Wvol.init = 0.5, z = 60) {
         aux.grid$Data <- grd
         redim(aux.grid) %>% return()
     })
-    out <- do.call("bindGrid", c(fffdi.list, dimension = "member"))
+    out <- suppressMessages(do.call("bindGrid", c(fffdi.list, dimension = "member")))
     out$Variable$varName <- "fffdi"
     descr <- "finnish_forest_fire_danger_index"
     attr(out$Variable, "description") <- descr
