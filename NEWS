@@ -1,5 +1,8 @@
-New in fireDanger
-=================
+fireDanger changelog
+====================
 
-* Added CITATION file
-* Documentation updates
+For earlier version descriptions, got to the [Releases Tab](https://github.com/SantanderMetGroup/fireDanger/releases)
+
+## v1.1.0 (4 Oct 2018)
+* Included an implementation of the Finish Forest Fire Danger Index System
+* Other minor changes and documentation updates

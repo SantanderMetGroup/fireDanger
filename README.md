@@ -4,7 +4,7 @@ What is fireDanger?
 `fireDanger` is an R package for the Implementation of the Canadian Fire Weather Index System using as input seasonal forecast data and other climatic datasets.
 
 *** 
-`fireDanger` is part of the [**loadeR**](https://github.com/SantanderMetGroup/loadeR) **bundle**.
+`fireDanger` is part of the **climate4R bundle**.
 
 ***
 
