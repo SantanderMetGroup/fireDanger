@@ -11,10 +11,10 @@ fffdiGrid(pr, pet, Wvol.init = 0.5, z = 60)
 
 \item{pet}{A climate4R object containing daily (potential) evapotranspiration data (in mm).}
 
-\item{z}{reference surface layer thickness (mm). Default to 60.}
-
-\item{Wwol.init}{Initialization value for volumetric moisture, in the range 0.1-0.5.
+\item{Wvol.init}{Initialization value for volumetric moisture, in the range 0.1-0.5.
 Default to 0.5 (very wet soil), but see Details.}
+
+\item{z}{reference surface layer thickness (mm). Default to 60.}
 }
 \value{
 A climate4R object containing FFFDI data

@@ -19,7 +19,7 @@
 #' @description Implementation of the FFFDI for climate4R grids
 #' @param pr A climate4R object containing daily precipitation (in mm)
 #' @param pet A climate4R object containing daily (potential) evapotranspiration data (in mm).
-#' @param Wwol.init Initialization value for volumetric moisture, in the range 0.1-0.5.
+#' @param Wvol.init Initialization value for volumetric moisture, in the range 0.1-0.5.
 #'  Default to 0.5 (very wet soil), but see Details.
 #' @param z reference surface layer thickness (mm). Default to 60.
 #' @references Vajda, A., Venalainen, A., Suomi, I., Junila, P. and Makela, H., 2014. Assessment of forest 
