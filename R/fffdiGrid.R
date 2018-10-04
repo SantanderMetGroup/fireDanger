@@ -42,7 +42,7 @@
 #' @export
 
 
-fffiGrid <- function(pr, pet, Wvol.init = 0.5, z = 60) {
+fffdiGrid <- function(pr, pet, Wvol.init = 0.5, z = 60) {
     pr %<>% redim()
     pet %<>% redim()
     suppressMessages(checkDim(pr, pet))
