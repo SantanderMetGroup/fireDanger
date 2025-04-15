@@ -91,8 +91,8 @@ fwiGrid <- function(multigrid,
       }
       varnames <- multigrid$Variable$varName
       # Naming adjustments for RCM data
-      if ("^pr$" %in% varnames) multigrid$Variable$varName <- gsub("^pr$", "tp", varnames)
-      if ("sfcWind" %in% varnames) multigrid$Variable$varName <- gsub("sfcWind", "wss", varnames)
+      if (any(grepl("^pr$", varnames))) varnames <- gsub("^pr$", "tp", varnames)
+      if ("sfcWind" %in% varnames) varnames <- gsub("sfcWind", "wss", varnames)
       
       proj <- getGridProj(multigrid)
       ycoords <- multigrid$xyCoords$y
@@ -148,10 +148,14 @@ fwiGrid <- function(multigrid,
                   aux <- NULL
             }
             ## Multigrid subsetting
-            Tm1 <- subsetGrid(multigrid_chunk, var = grep("tas", varnames, value = TRUE)) %>% redim(drop = FALSE)
-            H1  <- subsetGrid(multigrid_chunk, var = grep("hurs", varnames, value = TRUE)) %>% redim(drop = FALSE)
-            r1  <- subsetGrid(multigrid_chunk, var = "tp") %>% redim(drop = FALSE)
-            W1  <- subsetGrid(multigrid_chunk, var = "wss") %>% redim(drop = FALSE)
+            Tm1 <- subsetGrid(multigrid_chunk,
+                              var = multigrid$Variable$varName[grep("tas", varnames)]) %>% redim(drop = FALSE)
+            H1  <- subsetGrid(multigrid_chunk,
+                              var = multigrid$Variable$varName[grep("hurs", varnames)]) %>% redim(drop = FALSE)
+            r1  <- subsetGrid(multigrid_chunk,
+                              var = multigrid$Variable$varName[grep("tp", varnames)]) %>% redim(drop = FALSE)
+            W1  <- subsetGrid(multigrid_chunk,
+                              var = multigrid$Variable$varName[grep("wss", varnames)]) %>% redim(drop = FALSE)
             multigrid_chunk <- NULL
             gc()
             ## Parallel checks
