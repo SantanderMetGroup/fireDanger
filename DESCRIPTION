@@ -19,7 +19,7 @@ Suggests:
 VignetteBuilder: knitr
 Type: Package
 Title: Fire weather index calculation from station and model data
-Version: 1.1.0
+Version: 1.1.1
 Date: 2018-10-04
 Authors@R: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [aut]",
