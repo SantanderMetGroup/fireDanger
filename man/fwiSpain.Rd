@@ -3,7 +3,8 @@
 \name{fwiSpain}
 \alias{fwiSpain}
 \title{Fire weather index data from observations and reanalysis at 7 locations in Spain}
-\format{A list of two elements, containing data of the NCEP/NCAR reanalysis and observations data respectively. 
+\format{
+A list of two elements, containing data of the NCEP/NCAR reanalysis and observations data respectively. 
 For each element of the list, a second list of length 7 is provided, each corresponding to a particular location in Spain,
  each of them containing a dataframe with the following fields:
  \itemize{
@@ -19,7 +20,8 @@ For each element of the list, a second list of length 7 is provided, each corres
   accumulated during the last 24h) and the NCEP reanalysis interpolated to the same locations (12:00 UTC), 
   encompassing a period of approximately 6 years (2006-2011). These records are therefore appropriate for the 
   calculation of several fire danger indices, requiring data measured around noon.
-   Further details on this dataset are provided in Bedia \emph{et al.} (2012).}
+   Further details on this dataset are provided in Bedia \emph{et al.} (2012).
+}
 \description{
 Temperature, relative humidity, precipitation and wind velocity data from 7 locations in Spain,
  as well as the resulting Fire Weather Index series, corresponding to both weather station observations

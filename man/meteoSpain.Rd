@@ -3,7 +3,9 @@
 \name{meteoSpain}
 \alias{meteoSpain}
 \title{Time series of meteo station data from Spain}
-\format{A data.frame}
+\format{
+A data.frame
+}
 \description{
 Daily precipitation, maximum and minimum temperature records.
 }

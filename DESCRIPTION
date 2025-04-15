@@ -3,32 +3,27 @@ Depends:
     R(>= 3.1.0)
 Imports:
     abind,
-    transformeR(>= 1.4.7),
+    transformeR(>= 2.1.0),
     magrittr,
     parallel
 Suggests:
     visualizeR,
     loadeR,
-    loadeR.ECOMS,
-    downscaleR,
-    easyVerification,
     knitr,
-    rmarkdown,
-    drought4R,
-    RColorBrewer
+    rmarkdown
 VignetteBuilder: knitr
 Type: Package
 Title: Fire weather index calculation from station and model data
-Version: 1.1.1
-Date: 2018-10-04
+Version: 1.2.0
+Date: 2025-04-15
 Authors@R: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [aut]",
     "Joaquin Bedia <bediaj@unican.es> [ctb, cre]",
     "Maialen Iturbide <miturbide@ifca.unican.es> [ctb]"))
 BugReports: https://github.com/SantanderMetGroup/fireDanger/issues
-URL: http://www.meteo.unican.es/climate4r
+URL: https://github.com/SantanderMetGroup/fireDanger
 Description: A climate4R package for computing several popular fire danger indices.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.0
+RoxygenNote: 7.3.2
