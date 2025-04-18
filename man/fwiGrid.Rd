@@ -4,9 +4,17 @@
 \alias{fwiGrid}
 \title{Fire Weather Index applied to multigrids}
 \usage{
-fwiGrid(multigrid, mask = NULL, what = "FWI", nlat.chunks = NULL,
-  restart.annual = TRUE, parallel = FALSE, ncores = NULL,
-  max.ncores = 16, ...)
+fwiGrid(
+  multigrid,
+  mask = NULL,
+  what = "FWI",
+  nlat.chunks = NULL,
+  restart.annual = TRUE,
+  parallel = FALSE,
+  ncores = NULL,
+  max.ncores = 16,
+  ...
+)
 }
 \arguments{
 \item{multigrid}{containing Tm (temperature records in deg. Celsius); H (relative humidity records in \%);
@@ -45,7 +53,7 @@ Implementation of the Canadian Fire Weather Index System for multigrids
 
 The variables composing the input multigrid are expected to have standard names, as defined by the dictionary
  (their names are stored in the \code{multigrid$Variable$varName} component).
-These are: \code{"tas"} for temperature, \code{"tp"} for precipitation, \code{"wss"} for windspeed. In the case of relative humidity,
+These are: \code{"tas"} for temperature, \code{"tp"} or \code{"pr"} for precipitation, \code{"wss"} or \code{"sfcWind"} for windspeed. In the case of relative humidity,
 either \code{"hurs"} or \code{"hursmin"} are accepted, the latter in case of FWI calculations according to the \dQuote{proxy} version
 described in Bedia \emph{et al} 2014.
 

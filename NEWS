@@ -6,3 +6,9 @@ For earlier version descriptions, got to the [Releases Tab](https://github.com/S
 ## v1.1.0 (4 Oct 2018)
 * Included an implementation of the Finish Forest Fire Danger Index System
 * Other minor changes and documentation updates
+
+## v1.2.0 (15 Apr 2025)
+* Admit Rotated Pole grids in fwiGrid
+* Allow variable names "pr" and "sfcWind" in input multigrid (apart from "tp" and "wss" respectively)
+
+

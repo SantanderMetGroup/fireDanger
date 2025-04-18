@@ -24,7 +24,7 @@
 #' 
 #' The variables composing the input multigrid are expected to have standard names, as defined by the dictionary
 #'  (their names are stored in the \code{multigrid$Variable$varName} component).
-#' These are: \code{"tas"} for temperature, \code{"tp"} for precipitation, \code{"wss"} for windspeed. In the case of relative humidity,
+#' These are: \code{"tas"} for temperature, \code{"tp"} or \code{"pr"} for precipitation, \code{"wss"} or \code{"sfcWind"} for windspeed. In the case of relative humidity,
 #' either \code{"hurs"} or \code{"hursmin"} are accepted, the latter in case of FWI calculations according to the \dQuote{proxy} version
 #' described in Bedia \emph{et al} 2014.
 #' 
@@ -66,6 +66,7 @@
 #' 
 #' @importFrom abind abind asub
 #' @importFrom parallel parLapply splitIndices
+#' @importFrom magrittr %>% 
 #' @importFrom transformeR redim getDim getShape parallelCheck getYearsAsINDEX subsetGrid array3Dto2Dmat mat2Dto3Darray 
 
 fwiGrid <- function(multigrid,
@@ -81,7 +82,7 @@ fwiGrid <- function(multigrid,
                         choices = c("FFMC", "DMC", "DC", "ISI", "BUI", "FWI", "DSR"),
                         several.ok = FALSE)
       fwi1D.opt.args <- list(...)
-      
+      # fwi1D.opt.args <- list()
       months <- as.integer(substr(multigrid$Dates[[1]]$start, start = 6, stop = 7))
       fwi1D.opt.args <- c(fwi1D.opt.args, list("what" = what))
       if ("lat" %in% names(fwi1D.opt.args)) {
@@ -89,13 +90,26 @@ fwiGrid <- function(multigrid,
             fwi1D.opt.args[-grep("lat", names(names(fwi1D.opt.args)))]
       }
       varnames <- multigrid$Variable$varName
+      # Naming adjustments for RCM data
+      if (any(grepl("^pr$", varnames))) varnames <- gsub("^pr$", "tp", varnames)
+      if ("sfcWind" %in% varnames) varnames <- gsub("sfcWind", "wss", varnames)
+      
+      proj <- getGridProj(multigrid)
       ycoords <- multigrid$xyCoords$y
-      xcoords <- multigrid$xyCoords$x
-      co <- expand.grid(ycoords, xcoords)[2:1]
+      co <- expand.grid(ycoords, multigrid$xyCoords$x)[2:1]
+      ## In rotated grids, actual latitude must be extracted from the 'lat' component of xyCoords
+      if (!is.null(proj) && proj == "RotatedPole") {
+          coords_geo <- data.frame("lon" = as.vector(multigrid$xyCoords$lon),
+                                   "lat" = as.vector(multigrid$xyCoords$lat))
+          co <- coords_geo[order(co[,1], co[,2]), ]
+          coords_geo <- NULL
+          gc(verbose = FALSE)
+      } 
+      
       dimNames.mg <- getDim(multigrid)
-      n.mem <- tryCatch(getShape(multigrid, "member"),
-                        error = function(er) 1L)
-      ## if (n.mem == 1L) multigrid <- redim(multigrid)
+      multigrid <- redim(multigrid, member = TRUE)
+      n.mem <- getShape(multigrid, "member")
+      
       yrsindex <- getYearsAsINDEX(multigrid)
       nyears <- length(unique(yrsindex))
       if (!is.null(mask)) {
@@ -126,7 +140,7 @@ fwiGrid <- function(multigrid,
                   multigrid_chunk$xyCoords$y <- multigrid$xyCoords$y[ind.lat]
                   ## Mask chunking
                   if (!is.null(mask)) {
-                        aux <- asub(mask$Data, idx = ind.lat, dims = grep("lat", dimNames.mask))
+                        aux <- asub(mask$Data, idx = ind.lat, dims = grep("lat", dimNames.mask), drop = FALSE)
                         attr(aux, "dimensions") <- dimNames.mask
                         mask_chunk$Data <- aux
                         mask_chunk$xyCoords$y <- mask_chunk$xyCoords$y[ind.lat]
@@ -134,15 +148,16 @@ fwiGrid <- function(multigrid,
                   aux <- NULL
             }
             ## Multigrid subsetting
-            Tm1 <- subsetGrid(multigrid_chunk, var = grep("tas", varnames, value = TRUE))
-            Tm1 <- redim(Tm1, drop = FALSE)
-            H1  <- subsetGrid(multigrid_chunk, var = grep("hurs", varnames, value = TRUE))
-            H1 <- redim(H1, drop = FALSE)
-            r1  <- subsetGrid(multigrid_chunk, var = "tp")
-            r1 <- redim(r1, drop = FALSE)
-            W1  <- subsetGrid(multigrid_chunk, var = "wss")
-            W1 <- redim(W1, drop = FALSE)
+            Tm1 <- subsetGrid(multigrid_chunk,
+                              var = multigrid$Variable$varName[grep("tas", varnames)]) %>% redim(drop = FALSE)
+            H1  <- subsetGrid(multigrid_chunk,
+                              var = multigrid$Variable$varName[grep("hurs", varnames)]) %>% redim(drop = FALSE)
+            r1  <- subsetGrid(multigrid_chunk,
+                              var = multigrid$Variable$varName[grep("tp", varnames)]) %>% redim(drop = FALSE)
+            W1  <- subsetGrid(multigrid_chunk,
+                              var = multigrid$Variable$varName[grep("wss", varnames)]) %>% redim(drop = FALSE)
             multigrid_chunk <- NULL
+            gc()
             ## Parallel checks
             parallel.pars <- parallelCheck(parallel, max.ncores, ncores)
             if (n.mem < 2 && isTRUE(parallel.pars$hasparallel)) {
@@ -159,7 +174,7 @@ fwiGrid <- function(multigrid,
             }
             ## Landmask 
             if (!is.null(mask)) {
-                  if (!("^time" %in% dimNames.mask)) {
+                  if (dimNames.mask[1] != "time") {
                         aux <- unname(abind(mask_chunk$Data, along = 0L))
                         attr(aux, "dimensions") <- c("time", dimNames.mask)
                   } else {
@@ -174,8 +189,12 @@ fwiGrid <- function(multigrid,
                   ind <- which(apply(aux, MARGIN = 2, FUN = function(y) !all(is.na(y))))
             }
             aux <- NULL
+            gc()
+            
             ## FWI calculation
-            message("[", Sys.time(), "] Processing chunk ", k, " out of ", nlat.chunks, "...")
+            if (nlat.chunks > 1) {
+                message("[", Sys.time(), "] Processing chunk ", k, " out of ", nlat.chunks, "...")
+            }
             a <- apply_fun(1:n.mem, function(x) {
                   Tm2 <- array3Dto2Dmat(subsetGrid(Tm1, members = x)$Data)
                   H2 <- array3Dto2Dmat(subsetGrid(H1, members = x)$Data)
@@ -197,8 +216,9 @@ fwiGrid <- function(multigrid,
                                           arg.list <- c(fwi1D.opt.args, arg.list2)
                                           z <- tryCatch({suppressWarnings(drop(do.call("fwi1D",
                                                                                        args = arg.list)))},
-                                                        error = function(err) {rep(NA, length(idx))})
-                                          ## if (length(z) < length(idx)) z <- rep(NA, length(idx))
+                                                        error = function(err) {
+                                                            rep(NA, length(idx))
+                                                        })
                                           return(z)
                                     })
                                     b[,ind[i]] <- do.call("c", annual.list)
@@ -212,8 +232,9 @@ fwiGrid <- function(multigrid,
                                     arg.list <- c(fwi1D.opt.args, arg.list2)
                                     z <- tryCatch({suppressWarnings(drop(do.call("fwi1D",
                                                                                  args = arg.list)))},
-                                                  error = function(err) {rep(NA, length(months))})
-                                    ## if (length(z) < nrow(b)) z <- rep(NA, nrow(b))
+                                                  error = function(err) {
+                                                      rep(NA, length(months))
+                                                  })
                                     b[,ind[i]] <- z
                               }
                         }
@@ -224,6 +245,7 @@ fwiGrid <- function(multigrid,
                   }
             })
             Tm1 <- r1 <- H1 <- W1 <- NULL
+            gc()
             unname(do.call("abind", list(a, along = 0)))
       })
       message("[", Sys.time(), "] Done.")
